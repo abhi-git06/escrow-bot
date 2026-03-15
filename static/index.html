@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Escrow Arbitrator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <div class="logo">🔐</div>
+            <div>
+                <h1>AI Escrow Arbitrator</h1>
+                <p>Trustless freelance payments on GOAT Testnet 3</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="badge online">🟢 Agent #211 Online</div>
+            <a href="https://t.me/abhinpbot" target="_blank" class="tg-btn">💬 Telegram Bot</a>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-number" id="totalJobs">0</div>
+            <div class="stat-label">Total Jobs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🟡</div>
+            <div class="stat-number" id="openJobs">0</div>
+            <div class="stat-label">Open Jobs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-number" id="completedJobs">0</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-number" id="disputedJobs">0</div>
+            <div class="stat-label">Disputed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-number" id="totalUSDC">0</div>
+            <div class="stat-label">USDC Escrowed</div>
+        </div>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('client', this)">👤 Client</button>
+        <button class="tab" onclick="switchTab('freelancer', this)">💼 Freelancer</button>
+        <button class="tab" onclick="switchTab('leaderboard', this)">🏆 Leaderboard</button>
+        <button class="tab" onclick="switchTab('history', this)">📝 History</button>
+    </div>
+
+    <!-- Client View -->
+    <main id="clientView">
+        <div class="left-panel">
+            <div class="card">
+                <div class="card-header"><span>📋 Post a New Job</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Job Description</label>
+                        <textarea id="jobDesc" placeholder="e.g. Write a Twitter thread about x402 protocol..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Amount (USDC)</label>
+                            <input type="number" id="jobAmount" placeholder="5" />
+                        </div>
+                        <div class="form-group">
+                            <label>Deadline (hours)</label>
+                            <input type="number" id="jobDeadline" placeholder="2" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Telegram Username</label>
+                        <input type="text" id="jobClient" placeholder="e.g. abhi_webdev" value="abhi_webdev" />
+                    </div>
+                    <button class="btn-primary" onclick="postJob()">🔒 Lock Payment & Post Job</button>
+                    <div class="success-msg" id="successMsg"></div>
+                    <div class="error-msg" id="errorMsg"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span>🤖 Agent Info</span></div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label">Agent ID</span>
+                            <span class="info-value highlight">#211</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Protocol</span>
+                            <span class="info-value">ERC-8004</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Network</span>
+                            <span class="info-value">GOAT Testnet 3</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Payment</span>
+                            <span class="info-value">x402 Protocol</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">AI Model</span>
+                            <span class="info-value">Llama 3.3 70B</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Merchant</span>
+                            <span class="info-value">abhishek_ai2</span>
+                        </div>
+                    </div>
+                    <a href="https://explorer.testnet3.goat.network/tx/0xbb087392a05934a467538e7ce6745c78b23a3396590a690543258bd0c8f40b6d"
+                       target="_blank" class="btn-outline" style="margin-top:16px; display:block; text-align:center;">
+                        🔗 View On-Chain Registration
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="card full-height">
+                <div class="card-header">
+                    <span>📊 Live Job Board</span>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div class="card-body" id="jobsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No jobs yet</p>
+                        <p class="empty-sub">Post a job above or use the Telegram bot</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Freelancer View -->
+    <main id="freelancerView" style="display:none;">
+        <div class="left-panel">
+            <div class="card">
+                <div class="card-header"><span>📤 Submit Work</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Job ID</label>
+                        <input type="text" id="submitJobId" placeholder="e.g. BN0YZK" />
+                    </div>
+                    <div class="form-group">
+                        <label>Your Telegram Username</label>
+                        <input type="text" id="freelancerName" placeholder="e.g. abhi_webdev" />
+                    </div>
+                    <div class="form-group">
+                        <label>Your Completed Work</label>
+                        <textarea id="submitWork" style="height:140px;"
+                            placeholder="Paste your completed work here..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="submitWork()">🤖 Submit for AI Evaluation</button>
+                    <div class="success-msg" id="submitSuccessMsg"></div>
+                    <div class="error-msg" id="submitErrorMsg"></div>
+
+                    <div id="resultBox" style="display:none; margin-top:16px;">
+                        <div class="result-card">
+                            <div class="result-header">🏛 AI Arbitration Result</div>
+                            <div class="result-score">
+                                <span id="resultScore">0</span>
+                                <span class="result-score-label">/10</span>
+                            </div>
+                            <div class="score-bar" style="margin:12px 0;">
+                                <div class="score-fill" id="resultScoreFill" style="width:0%"></div>
+                            </div>
+                            <div id="resultVerdict" class="result-verdict"></div>
+                            <div id="resultReasoning" class="result-reasoning"></div>
+                            <div id="resultPayment" class="result-payment"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispute Card -->
+            <div class="card">
+                <div class="card-header"><span>⚖️ Raise a Dispute</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Job ID</label>
+                        <input type="text" id="disputeJobId" placeholder="e.g. BN0YZK" />
+                    </div>
+                    <div class="form-group">
+                        <label>Your Telegram Username</label>
+                        <input type="text" id="disputeUser" placeholder="e.g. abhi_webdev" />
+                    </div>
+                    <div class="form-group">
+                        <label>Reason for Dispute</label>
+                        <textarea id="disputeReason" style="height:80px;"
+                            placeholder="Explain why you disagree with the AI verdict..."></textarea>
+                    </div>
+                    <button class="btn-primary"
+                        style="background: linear-gradient(135deg, #ff6b35, #ff4500);"
+                        onclick="raiseDispute()">⚖️ Submit Dispute</button>
+                    <div class="success-msg" id="disputeSuccessMsg"></div>
+                    <div class="error-msg" id="disputeErrorMsg"></div>
+                    <div id="disputeResultBox" style="display:none; margin-top:16px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="card full-height">
+                <div class="card-header">
+                    <span>🟡 Open Jobs</span>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div class="card-body" id="openJobsList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No open jobs</p>
+                        <p class="empty-sub">Check back soon!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Leaderboard View -->
+    <main id="leaderboardView" style="display:none;">
+        <div style="padding: 0 40px 40px; width: 100%;">
+            <div class="card">
+                <div class="card-header">
+                    <span>🏆 Freelancer Leaderboard</span>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div class="card-body" id="leaderboardList">
+                    <div class="empty-state">
+                        <div class="empty-icon">🏆</div>
+                        <p>No freelancers yet</p>
+                        <p class="empty-sub">Complete jobs to appear here!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- History View -->
+    <main id="historyView" style="display:none;">
+        <div style="padding: 0 40px 40px; width: 100%;">
+            <div class="card">
+                <div class="card-header"><span>📝 Job History</span></div>
+                <div class="card-body">
+                    <div class="form-group" style="display:flex; gap:12px; margin-bottom:20px;">
+                        <input type="text" id="historyUsername"
+                            placeholder="Enter Telegram username to search history..."
+                            style="flex:1; background:#080b14; border:1px solid #1e2d3d; border-radius:8px; padding:10px 12px; color:#e0e0e0; font-size:13px; outline:none;" />
+                        <button class="btn-primary" style="width:auto; padding:10px 20px;"
+                            onclick="loadHistory()">Search</button>
+                    </div>
+                    <div id="historyList">
+                        <div class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <p>Enter a username to view history</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
